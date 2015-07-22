@@ -1,4 +1,5 @@
 settings/local_settings.py
+cache.db
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

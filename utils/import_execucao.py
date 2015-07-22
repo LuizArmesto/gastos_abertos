@@ -28,7 +28,7 @@ def insert_rows(db, rows_data):
     db.session.commit()
 
 
-def insert_csv(csv, lines_per_insert):
+def insert_csv(db, csv, lines_per_insert):
     print(csv)
     table = pd.read_csv(csv)
     counter = ProgressCounter(len(table))
@@ -70,12 +70,12 @@ def insert_csv(csv, lines_per_insert):
     counter.end()
 
 
-def insert_all(folder="../../gastos_abertos_dados/Orcamento/execucao/",
+def insert_all(db, folder="../../gastos_abertos_dados/Orcamento/execucao/",
                lines_per_insert=100):
 
     csvs = sorted([i for i in os.listdir(folder) if i[-4:] == ".csv"])
     for csv in csvs:
-        insert_csv(os.path.join(folder, csv), lines_per_insert)
+        insert_csv(db, os.path.join(folder, csv), lines_per_insert)
 
 
 if __name__ == '__main__':
@@ -83,14 +83,14 @@ if __name__ == '__main__':
     Execucao.metadata.create_all(db.engine, checkfirst=True)
 
     arguments = docopt(__doc__)
-    args = {}
+    kwargs = {}
 
     lines_per_insert = arguments['LINES_PER_INSERT']
     if lines_per_insert:
-        args['lines_per_insert'] = int(lines_per_insert)
+        kwargs['lines_per_insert'] = int(lines_per_insert)
 
     folder = arguments['FOLDER']
     if folder:
-        args['folder'] = folder
+        kwargs['folder'] = folder
 
-    insert_all(**args)
+    insert_all(db, **kwargs)

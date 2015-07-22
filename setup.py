@@ -28,7 +28,10 @@ setup(
         'geoalchemy2',
         'fabric',
         'docopt',
-        'pandas'
+        'pandas',
+	'psycopg2',
+	'geopy',
+	'shapely',
     ],
     classifiers=[
         'Environment :: Web Environment',

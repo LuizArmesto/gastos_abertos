@@ -66,8 +66,7 @@ class ContratoApi(restful.Resource):
     def filter(self, contratos_data):
         # Extract the arguments in GET request
         args = contratos_list_parser.parse_args()
-        page = args['page']
-        per_page_num = args['per_page_num']
+
         cnpj = args['cnpj']
         nome_fornecedor = args['nome_fornecedor']
         orgao = args['orgao']
@@ -81,35 +80,32 @@ class ContratoApi(restful.Resource):
             contratos_data = contratos_data.filter(Contrato.cnpj == cnpj)
 
         if nome_fornecedor:
-            nome_query = '%{}%'.format(nome_fornecedor)
+            nome_query = u'%{}%'.format(nome_fornecedor)
             contratos_data = contratos_data.filter(Contrato.nome_fornecedor.ilike(nome_query))
 
         if orgao:
-            orgao_query = '%{}%'.format(orgao)
+            orgao_query = u'%{}%'.format(orgao)
             contratos_data = contratos_data.filter(Contrato.orgao.ilike(orgao_query))
 
         if modalidade:
-            modalidade_query = '%{}%'.format(modalidade)
+            modalidade_query = u'%{}%'.format(modalidade)
             contratos_data = contratos_data.filter(Contrato.modalidade.ilike(modalidade_query))
 
         if evento:
-            evento_query = '%{}%'.format(evento)
+            evento_query = u'%{}%'.format(evento)
             contratos_data = contratos_data.filter(Contrato.evento.ilike(evento_query))
 
         if objeto:
-            objeto_query = '%{}%'.format(objeto)
+            objeto_query = u'%{}%'.format(objeto)
             contratos_data = contratos_data.filter(Contrato.objeto.ilike(objeto_query))
 
         if processo_administrativo:
-            processo_administrativo_query = '%{}%'.format(processo_administrativo)
+            processo_administrativo_query = u'%{}%'.format(processo_administrativo)
             contratos_data = contratos_data.filter(Contrato.processo_administrativo.ilike(processo_administrativo_query))
 
         if licitacao:
-            licitacao_query = '%{}%'.format(licitacao)
+            licitacao_query = u'%{}%'.format(licitacao)
             contratos_data = contratos_data.filter(Contrato.licitacao.ilike(licitacao_query))
-
-        # Limit que number of results per page
-        contratos_data = contratos_data.offset(page*per_page_num).limit(per_page_num)
 
         return contratos_data
 
@@ -133,6 +129,14 @@ class ContratoApi(restful.Resource):
 
         return contratos_data
 
+    def paginate(self, contratos_data):
+        args = contratos_list_parser.parse_args()
+        page = args['page']
+        per_page_num = args['per_page_num']
+        # Limit que number of results per page
+        contratos_data = contratos_data.offset(page*per_page_num).limit(per_page_num)
+
+        return contratos_data
 
 class ContratoListApi(ContratoApi):
 
@@ -149,6 +153,8 @@ class ContratoListApi(ContratoApi):
             'Access-Control-Expose-Headers': 'X-Total-Count',
             'X-Total-Count': contratos_data.count()
         }
+
+        contratos_data = self.paginate(contratos_data)
 
         return contratos_data.all(), 200, headers
 
@@ -221,6 +227,8 @@ class ContratoAggregateApi(ContratoApi):
             'Access-Control-Expose-Headers': 'X-Total-Count',
             'X-Total-Count': contratos_data.count()
         }
+
+        contratos_data = self.paginate(contratos_data)
 
         # Create the dictionary used to marshal
         fields_ = {'count': fields.Integer()}
